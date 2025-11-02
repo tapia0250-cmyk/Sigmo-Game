@@ -1,265 +1,98 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Main Menu - Sigmo</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loading Screen Full - Medieval Bar</title>
+<style>
+  /* Full-screen loading container */
+  #loadingScreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    flex-direction: column;
+    z-index: 1000;
+    overflow: hidden;
+  }
 
-  <!-- Medieval-style font from Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&display=swap" rel="stylesheet">
+  video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* ensures the video fills the screen */
+  }
 
-  <style>
-    :root{
-      --btn-width-desktop: 420px;
-      --btn-height-desktop: 86px;
-      --btn-width-mobile: 90%;
-      --btn-height-mobile: 68px;
-      --accent-color: #f5e6c8;
-    }
-    html,body {
-      height:100%;
-      margin:0;
-      font-family: Inter, system-ui, Arial, sans-serif;
-      background:#000;
-      overflow:hidden;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-    }
+  #loadingBarContainer {
+    width: 90%;
+    height: 25px; /* gives volume/thickness */
+    background: rgba(50, 30, 0, 0.7); /* dark background for contrast */
+    margin: 20px auto;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    z-index: 2;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); /* inner shadow for depth */
+  }
 
-    /* Background video */
-    #video-bg {
-      position:fixed;
-      inset:0;
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      z-index:0;
-      filter: brightness(0.55);
-    }
+  #loadingBar {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #B8860B, #DAA520, #FFD700, #B8860B); /* medieval matte gold */
+    box-shadow: 0 0 10px rgba(218,165,32,0.6), inset 0 2px 4px rgba(255,255,255,0.3); /* shine & inner glow */
+    border-radius: 12px 0 0 12px;
+    background-size: 200% 100%;
+    animation: shine 2s linear infinite;
+  }
 
-    /* Center container (no translucent box) */
-    .menu {
-      position:fixed;
-      left:50%;
-      top:50%;
-      transform:translate(-50%,-50%);
-      z-index:10;
-      width: min(960px, 96%);
-      padding: 6px 12px 20px;
-      text-align:center;
-      pointer-events:auto;
-      isolation:isolate;
-    }
-
-    /* --- Logo --- */
-    .logo {
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      margin: 0 0 18px;
-      pointer-events:none;
-      animation: logoIn 900ms cubic-bezier(.2,.9,.3,1) both;
-    }
-    .logo img {
-      display:block;
-      width:auto;
-      max-width: 90%;
-      max-height: 260px;   /* bigger logo */
-      filter: drop-shadow(0 18px 28px rgba(0,0,0,0.6));
-      transform-origin: center top;
-    }
-
-    /* Buttons container (vertical) */
-    .btn-list {
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:14px;
-      margin-top:8px;
-      padding: 6px 0 0;
-    }
-     
-    /* Button style with plaque image */
-    .btn-plaque {
-      --w: var(--btn-width-desktop);
-      --h: var(--btn-height-desktop);
-      width: var(--w);
-      height: var(--h);
-      padding:0;
-      border:0;
-      border-radius:10px;
-      background: transparent;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      position:relative;
-      cursor:pointer;
-      font-family: "Cinzel", serif;
-      font-weight:700;
-      font-size:1.05rem;
-      color: var(--accent-color);
-      text-shadow: 0 2px 6px rgba(0,0,0,0.6);
-      box-shadow: 0 10px 28px rgba(0,0,0,0.55);
-      transition: transform 200ms cubic-bezier(.2,.9,.3,1), filter 180ms;
-      overflow:visible;
-      animation: btnIn 900ms cubic-bezier(.2,.9,.3,1) both;
-    }
-
-    /* Plaque image inside the button */
-    .btn-plaque .plaque-img {
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
-      mix-blend-mode: multiply; /* hides white edges */
-      pointer-events:none;
-    }
-
-    .btn-plaque .label {
-      position:relative;
-      z-index:5;
-      pointer-events:none;
-      padding: 6px 12px;
-    }
-
-    .btn-plaque:active { transform: translateY(2px) scale(0.997); }
-    .btn-plaque:hover { transform: translateY(-6px) scale(1.01); filter:brightness(1.04); }
-
-    .btn-plaque:focus {
-      outline: 3px solid rgba(120,170,255,0.14);
-      outline-offset: 6px;
-      transform: translateY(-6px) scale(1.01);
-    }
-
-    /* Mobile adjustments */
-    @media (max-width:720px){
-      .logo img { max-height: 140px; }
-      .btn-plaque {
-        --w: var(--btn-width-mobile);
-        --h: var(--btn-height-mobile);
-        font-size: 0.98rem;
-      }
-    }
-
-    /* Subtle effect for Exit button */
-    .btn-exit { opacity:0.95; color: #e8d4b8; }
-
-    /* Animations */
-    @keyframes logoIn {
-      from { opacity:0; transform: translateY(-18px) scale(0.98); }
-      to   { opacity:1; transform: translateY(0) scale(1); }
-    }
-    @keyframes btnIn {
-      from { opacity:0; transform: translateY(12px) scale(0.995); filter: blur(2px); }
-      to   { opacity:1; transform: translateY(0) scale(1); filter: blur(0); }
-    }
-
-  </style>
+  @keyframes shine {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+</style>
 </head>
 <body>
 
-  <!-- Background video -->
-  <video id="video-bg" autoplay muted loop playsinline>
-    <source src="ruins-beneath-red-leaves.1920x1080.mp4" type="video/mp4">
-    Your browser does not support HTML5 videos.
-  </video>
-
-  <!-- Background music -->
-  <audio id="bg-music" src="stellar-guardian-medieval-music-282967.mp3" loop></audio>
-
-  <!-- Main Menu -->
-  <div class="menu" id="main-menu" role="dialog" aria-label="Sigmo Main Menu">
-
-    <!-- Centered Logo -->
-    <div class="logo" aria-hidden="false">
-      <img src="unnamed__2_-removebg-preview.png" alt="Sigmo logo">
-    </div>
-
-    <!-- Buttons in column -->
-    <div class="btn-list" role="menu" aria-label="Main Menu Options">
-      <button class="btn-plaque" id="btn-start" aria-label="Start Game" role="menuitem">
-        <img class="plaque-img" src="9262da4a-181c-4435-a663-99afed66c57f.png" alt="">
-        <span class="label">Start Game</span>
-      </button>
-
-      <button class="btn-plaque" id="btn-options" aria-label="Options" role="menuitem">
-        <img class="plaque-img" src="9262da4a-181c-4435-a663-99afed66c57f.png" alt="">
-        <span class="label">Options</span>
-      </button>
-
-      <button class="btn-plaque" id="btn-credits" aria-label="Credits" role="menuitem">
-        <img class="plaque-img" src="9262da4a-181c-4435-a663-99afed66c57f.png" alt="">
-        <span class="label">Credits</span>
-      </button>
-
-      <button class="btn-plaque btn-exit" id="btn-exit" aria-label="Exit" role="menuitem">
-        <img class="plaque-img" src="9262da4a-181c-4435-a663-99afed66c57f.png" alt="">
-        <span class="label">Exit</span>
-      </button>
-    </div>
-
+<div id="loadingScreen">
+  <video id="fallenVideo" muted playsinline></video>
+  <div id="loadingBarContainer">
+    <div id="loadingBar"></div>
   </div>
+</div>
 
-  <script>
-    const btnStart = document.getElementById('btn-start');
-    const btnOptions = document.getElementById('btn-options');
-    const btnCredits = document.getElementById('btn-credits');
-    const btnExit = document.getElementById('btn-exit');
-    const bgMusic = document.getElementById('bg-music');
-    const menu = document.getElementById('main-menu');
+<script>
+  const video = document.getElementById('fallenVideo');
+  const loadingBar = document.getElementById('loadingBar');
+  const loadingScreen = document.getElementById('loadingScreen');
 
-    // Attempt autoplay
-    window.addEventListener('load', async () => {
-      try {
-        bgMusic.volume = 0.45;
-        await bgMusic.play();
-      } catch (e) {
-        try {
-          bgMusic.muted = true;
-          await bgMusic.play();
-        } catch (err) {}
-      }
-    });
+  // Set up the video
+  video.src = 'fallen.mp4';
+  video.load();
+  video.play();
 
-    function startGame() {
-      menu.style.transition = "opacity 600ms ease, transform 600ms ease";
-      menu.style.opacity = 0;
-      menu.style.transform = "translate(-50%,-46%) scale(0.98)";
-      setTimeout(() => { menu.style.display = 'none'; }, 650);
+  // Update the progress bar based on video duration
+  function updateBar() {
+    const progress = (video.currentTime / video.duration) * 100;
+    loadingBar.style.width = progress + '%';
 
-      try {
-        bgMusic.muted = false;
-        bgMusic.volume = 0.45;
-        bgMusic.play().catch(()=>{});
-      } catch(e){}
+    if (!video.paused && !video.ended) {
+      requestAnimationFrame(updateBar);
+    } else {
+      // Video finished, hide the loading screen
+      loadingScreen.style.display = 'none';
+      loadingBar.style.width = '0%';
     }
+  }
 
-    btnStart.addEventListener('click', startGame);
-    btnOptions.addEventListener('click', () => alert('Options: coming soon.'));
-    btnCredits.addEventListener('click', () => alert('Credits: Made with Three.js and HTML5.'));
-    btnExit.addEventListener('click', () => {
-      if (confirm('Do you want to exit?')) window.location.reload();
-    });
+  video.addEventListener('play', updateBar);
+</script>
 
-    // Press Enter to start
-    window.addEventListener('keydown', e => {
-      if (e.key === 'Enter') startGame();
-    });
-
-    // Unlock audio after user interaction
-    function unlockAudioOnInteraction() {
-      try {
-        bgMusic.muted = false;
-        bgMusic.volume = 0.45;
-        bgMusic.play().catch(()=>{});
-      } catch(e){}
-      window.removeEventListener('click', unlockAudioOnInteraction);
-      window.removeEventListener('keydown', unlockAudioOnInteraction);
-    }
-    window.addEventListener('click', unlockAudioOnInteraction);
-    window.addEventListener('keydown', unlockAudioOnInteraction);
-  </script>
 </body>
 </html>
